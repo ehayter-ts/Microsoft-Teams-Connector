@@ -604,8 +604,7 @@ ondescribe = function () {
                             ChannelId
                         ],
                         requiredInputs: [ChannelId,
-                            ChannelTeamId,
-                            MembershipType],
+                            ChannelTeamId],
                         outputs: [ChannelId,
                             ChannelDisplayName,
                             ChannelDescription,
@@ -632,10 +631,12 @@ ondescribe = function () {
                         type: "create",
                         inputs: [ChannelTeamId,
                             ChannelDisplayName,
+                            MembershipType,
                             ChannelDescription
                         ],
                         requiredInputs: [ChannelTeamId,
-                            ChannelDisplayName
+                            ChannelDisplayName,
+                            MembershipType
                         ],
                         outputs: [ChannelId,
                             ChannelDisplayName,
