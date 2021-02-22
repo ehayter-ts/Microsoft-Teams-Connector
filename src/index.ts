@@ -2019,14 +2019,14 @@ function onexecuteChannelAddMember(parameters: SingleRecord, properties: SingleR
     GetChannelUser(parameters, properties, function (b) {
         properties[ChannelUserPrincipalName] = b.userPrincipalName;
         properties[ChannelUserId] = b.id;
-        // AddChannelMembers(parameters, properties, function (c) {
-        //     //ToDO - remove the if condition and handle in try catch block
-        //     if (c.responseText == null || c.responseText == "" || c.responseText == undefined || c.responseText == "undefined") {
+        AddChannelMembers(parameters, properties, function (c) {
+            //ToDO - remove the if condition and handle in try catch block
+            if (c.responseText == null || c.responseText == "" || c.responseText == undefined || c.responseText == "undefined") {
                 postResult({
                     [ChannelIsSuccessful]: true
                 });
-  //          }
-//        });
+           }
+       });
     });
 }
 
