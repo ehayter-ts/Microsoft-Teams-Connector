@@ -2291,13 +2291,6 @@ function GetMentions(properties, message)
         });
     }
 
-    var count = 0;
-
-    while (mentions.length != matches.length)
-    {
-        count++;    
-    }
-
     return mentions;
 }
 
