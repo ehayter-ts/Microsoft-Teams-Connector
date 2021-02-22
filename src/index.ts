@@ -2232,14 +2232,22 @@ function onexecuteSendMessage(parameters: SingleRecord, properties: SingleRecord
 
 function SendMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
     var importance = properties[ChannelMessageIsImportant] == "true" ? "High" : "Normal";
-    var data = JSON.stringify({
+    var obj = {
         "subject": properties[ChannelMessageSubject],
         "importance": importance.toString(),
         "body": {
             "contentType": "html",
             "content": properties[ChannelMessageBody]
-        }
-    });
+        },
+        "mentions": []
+    };
+
+    if (properties[ChannelMessageBody].toString().indexOf("<at") > -1)
+    {
+        obj.mentions = GetMentions(properties[ChannelMessageBody].toString());
+    }
+
+    var data = JSON.stringify(data);
 
     let channelTeamId = properties[ChannelTeamId];
     if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
@@ -2252,6 +2260,44 @@ function SendMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
         if (typeof cb === 'function')
             cb(responseText);
     });
+}
+
+function GetMentions(message)
+{
+    var mentions = [];
+
+    var iterator = message.matchAll(/<at[^>]*>(.*?)<\/at>/gm);
+    var next = iterator.next();
+    var count = 0;
+
+    while (next.done != false)
+    {
+        var properties = {
+            ChannelUserPrincipalName: next[1]
+        };
+
+        GetChannelUser(null, properties, function (b) {
+            var mentionObj = {
+                "id": count,
+                "mentionText": b.displayName,
+                "mentioned": {
+                    "application": null,
+                    "device": null,
+                    "conversation": null,
+                    "user": {
+                        "id": b.id,
+                        "displayName": b.displayName,
+                        "userIdentityType": "aadUser"
+                    }
+                }
+            };
+            mentions.push(mentionObj);
+        });
+        count++;
+        next = iterator.next();
+    }
+
+    return mentions;
 }
 
 function onexecuteReplyMessage(parameters: SingleRecord, properties: SingleRecord) {
