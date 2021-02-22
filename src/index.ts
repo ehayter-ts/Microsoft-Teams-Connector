@@ -2023,7 +2023,7 @@ function onexecuteChannelAddMember(parameters: SingleRecord, properties: SingleR
             //ToDO - remove the if condition and handle in try catch block
             if (c.responseText == null || c.responseText == "" || c.responseText == undefined || c.responseText == "undefined") {
                 postResult({
-                    [ChannelsIsSuccessful]: true
+                    [ChannelIsSuccessful]: true
                 });
             }
         });
