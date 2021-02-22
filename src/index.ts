@@ -2244,7 +2244,7 @@ function SendMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
 
     if (properties[ChannelMessageBody].toString().indexOf("<at") > -1)
     {
-        obj.mentions = GetMentions(properties[ChannelMessageBody].toString());
+        obj.mentions = GetMentions(properties, properties[ChannelMessageBody].toString());
     }
 
     var data = JSON.stringify(data);
@@ -2262,7 +2262,7 @@ function SendMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
     });
 }
 
-function GetMentions(message)
+function GetMentions(properties, message)
 {
     var mentions = [];
     
@@ -2270,9 +2270,7 @@ function GetMentions(message)
 
     for (let i = 0; i < matches.length; i++)
     {
-        var properties = {
-            ChannelUserPrincipalName: matches[i].replace(/<[^>]+>/g, '')
-        };
+        properties[ChannelUserPrincipalName] = matches[i].replace(/<[^>]+>/g, '');
 
         GetChannelUser(null, properties, function (b) {
             var mentionObj = {
