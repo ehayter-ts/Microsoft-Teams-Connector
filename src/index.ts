@@ -604,7 +604,8 @@ ondescribe = function () {
                             ChannelId
                         ],
                         requiredInputs: [ChannelId,
-                            ChannelTeamId],
+                            ChannelTeamId,
+                            MembershipType],
                         outputs: [ChannelId,
                             ChannelDisplayName,
                             ChannelDescription,
