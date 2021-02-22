@@ -1795,7 +1795,7 @@ function ExecuteRequest(url: string, data: string, requestType: string, cb) {
     // Authentication Header
     xhr.withCredentials = true;
     xhr.setRequestHeader("Accept", "application/json");
-    if (requestType.toUpperCase() == "PUT" || requestType.toUpperCase() == "POST" || requestType.toUpperCase() == "PATCH") {
+    if (requestType.toUpperCase() == "GET" || requestType.toUpperCase() == "PUT" || requestType.toUpperCase() == "POST" || requestType.toUpperCase() == "PATCH") {
         xhr.setRequestHeader("Content-Type", "application/json");
     }
     xhr.send(data);
