@@ -2244,7 +2244,7 @@ function SendMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
 
     if (properties[ChannelMessageBody].toString().indexOf("<at") > -1)
     {
-        obj.mentions = GetMentions(properties, properties[ChannelMessageBody].toString());
+        obj.mentions = GetMentions(properties, "" + properties[ChannelMessageBody]);
     }
 
     var data = JSON.stringify(obj);
