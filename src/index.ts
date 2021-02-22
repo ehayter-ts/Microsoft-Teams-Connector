@@ -2016,20 +2016,17 @@ function onexecuteTeamAddMember(parameters: SingleRecord, properties: SingleReco
 }
 
 function onexecuteChannelAddMember(parameters: SingleRecord, properties: SingleRecord) {
-    // GetChannelUser(parameters, properties, function (b) {
-    //     properties[ChannelUserPrincipalName] = b.userPrincipalName;
-    //     properties[ChannelUserId] = b.id;
-    //     AddChannelMembers(parameters, properties, function (c) {
-    //         //ToDO - remove the if condition and handle in try catch block
-    //         if (c.responseText == null || c.responseText == "" || c.responseText == undefined || c.responseText == "undefined") {
-    //             postResult({
-    //                 [ChannelIsSuccessful]: true
-    //             });
-    //         }
-    //     });
-    // });
-    postResult({
-        [ChannelIsSuccessful]: true
+    GetChannelUser(parameters, properties, function (b) {
+        properties[ChannelUserPrincipalName] = b.userPrincipalName;
+        properties[ChannelUserId] = b.id;
+        // AddChannelMembers(parameters, properties, function (c) {
+        //     //ToDO - remove the if condition and handle in try catch block
+        //     if (c.responseText == null || c.responseText == "" || c.responseText == undefined || c.responseText == "undefined") {
+                postResult({
+                    [ChannelIsSuccessful]: true
+                });
+  //          }
+//        });
     });
 }
 
