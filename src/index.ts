@@ -1700,7 +1700,7 @@ function AddChannelMembers(parameters: SingleRecord, properties: SingleRecord, c
     var data = JSON.stringify({
         "@odata.type": "#microsoft.graph.aadUserConversationMember",
         "roles": [],
-        "@odata.bind": baseUriEndpoint + "/users('" + properties[TeamUserId] + "')"
+        "@odata.bind": baseUriEndpoint + "/users('" + properties[ChannelUserId] + "')"
     });
 
     let teamId = properties[ChannelTeamId];
