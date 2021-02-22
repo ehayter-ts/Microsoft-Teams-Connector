@@ -97,6 +97,7 @@ const ChannelDelete = "delete";
 const ChannelUpdate = "update";
 const ChannelSendMessage = "sendMessage";
 const ChannelReplyMessage = "replyMessage";
+const MembershipType = "membershipType";
 
 //
 // Tab
@@ -587,6 +588,11 @@ ondescribe = function () {
                         displayName: "Is Important",
                         description: "Message Importance (Normal/High)",
                         type: "boolean"
+                    },
+                    [MembershipType]: {
+                        displayName: "Membership Type",
+                        description: "Type of Channel",
+                        type: "string"
                     }
                 },
                 methods: {
@@ -2069,6 +2075,7 @@ function CreateChannel(parameters: SingleRecord, properties: SingleRecord, cb) {
     var data = JSON.stringify({
         "displayName": properties[ChannelDisplayName],
         "description": properties[ChannelDescription],
+        "membershipType": properties[MembershipType]
     });
 
     let channelTeamId = properties[ChannelTeamId];
