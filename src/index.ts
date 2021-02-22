@@ -89,6 +89,9 @@ const ChannelMessageSubject = "messageSubject";
 const ChannelMessageBody = "messageBody";
 const ChannelMessageId = "messageId";
 const ChannelMessageIsImportant = "messageIsImportant";
+const MembershipType = "membershipType";
+const ChannelUserPrincipalName = "userPrincipalName";
+const ChannelUserId = "userId";
 
 const ChannelGet = "get";
 const ChannelList = "list";
@@ -97,7 +100,8 @@ const ChannelDelete = "delete";
 const ChannelUpdate = "update";
 const ChannelSendMessage = "sendMessage";
 const ChannelReplyMessage = "replyMessage";
-const MembershipType = "membershipType";
+const ChannelAddMember = "addMember";
+
 
 //
 // Tab
@@ -593,6 +597,11 @@ ondescribe = function () {
                         displayName: "Membership Type",
                         description: "Type of Channel",
                         type: "string"
+                    },
+                    [ChannelUserPrincipalName]: {
+                        displayName: "User Principal Name",
+                        description: "Principal Name of User",
+                        type: "string"
                     }
                 },
                 methods: {
@@ -670,6 +679,20 @@ ondescribe = function () {
                             ChannelTeamId,
                             ChannelDisplayName,
                             ChannelDescription],
+                        outputs: [ChannelIsSuccessful]
+                    },
+                    [ChannelAddMember]: {
+                        displayName: "Add Member",
+                        description: "Adds a member to a Channel",
+                        type: "create",
+                        inputs: [ChannelTeamId,
+                            ChannelId,
+                            ChannelUserPrincipalName
+                        ],
+                        requiredInputs: [ChannelTeamId,
+                            ChannelId,
+                            ChannelUserPrincipalName
+                        ],
                         outputs: [ChannelIsSuccessful]
                     },
                     [ChannelSendMessage]: {
@@ -1632,6 +1655,17 @@ function GetUser(parameters: SingleRecord, properties: SingleRecord, cb) {
     });
 }
 
+function GetChannelUser(parameters: SingleRecord, properties: SingleRecord, cb) {
+    let channelUserPrincipalName = properties[ChannelUserPrincipalName];
+    if (!(typeof channelUserPrincipalName === "string")) throw new Error("properties[ChannelUserPrincipalName] is not of type string");
+
+    var url = baseUriEndpoint + "/users/" + encodeURIComponent(channelUserPrincipalName);
+    ExecuteRequest(url, null, "GET", function (responseText) {
+        if (typeof cb === 'function')
+            cb(responseText);
+    });
+}
+
 function AddGroupOwner(parameters: SingleRecord, properties: SingleRecord, cb) {
     var data = JSON.stringify({
         "@odata.id": baseUriEndpoint + "/users/" + properties[TeamUserId]
@@ -1656,6 +1690,26 @@ function AddGroupMembers(parameters: SingleRecord, properties: SingleRecord, cb)
     if (!(typeof teamId === "string")) throw new Error("properties[TeamId] is not of type string");
 
     var url = baseUriEndpoint + "/groups/" + encodeURIComponent(teamId) + "/members/$ref";
+    ExecuteRequest(url, data, "POST", function (responseText) {
+        if (typeof cb === 'function')
+            cb(responseText);
+    });
+}
+
+function AddChannelMembers(parameters: SingleRecord, properties: SingleRecord, cb) {
+    var data = JSON.stringify({
+        "@odata.type": "#microsoft.graph.aadUserConversationMember",
+        "roles": [],
+        "@odata.bind": baseUriEndpoint + "/users('" + properties[TeamUserId] + "')"
+    });
+
+    let teamId = properties[ChannelTeamId];
+    let channelId = properties[ChannelId];
+
+    if (!(typeof teamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
+    if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
+
+    var url = baseUriEndpoint + "/teams/" + encodeURIComponent(teamId) + "/channels/" + encodeURIComponent(channelId) + "/members";
     ExecuteRequest(url, data, "POST", function (responseText) {
         if (typeof cb === 'function')
             cb(responseText);
@@ -1933,6 +1987,9 @@ function onexecuteChannel(methodName: string, parameters: SingleRecord, properti
         case ChannelUpdate:
             onexecuteChannelUpdate(parameters, properties);
             break;
+        case ChannelAddMember:
+            onexecuteChannelAddMember(parameters, properties);
+            break;
         case ChannelSendMessage:
             onexecuteSendMessage(parameters, properties);
             break;
@@ -1948,6 +2005,21 @@ function onexecuteTeamAddMember(parameters: SingleRecord, properties: SingleReco
         properties[TeamUserPrincipalName] = b.userPrincipalName;
         properties[TeamUserId] = b.id;
         AddGroupMembers(parameters, properties, function (c) {
+            //ToDO - remove the if condition and handle in try catch block
+            if (c.responseText == null || c.responseText == "" || c.responseText == undefined || c.responseText == "undefined") {
+                postResult({
+                    [TeamIsSuccessful]: true
+                });
+            }
+        });
+    });
+}
+
+function onexecuteChannelAddMember(parameters: SingleRecord, properties: SingleRecord) {
+    GetChannelUser(parameters, properties, function (b) {
+        properties[ChannelUserPrincipalName] = b.userPrincipalName;
+        properties[ChannelUserId] = b.id;
+        AddChannelMembers(parameters, properties, function (c) {
             //ToDO - remove the if condition and handle in try catch block
             if (c.responseText == null || c.responseText == "" || c.responseText == undefined || c.responseText == "undefined") {
                 postResult({
