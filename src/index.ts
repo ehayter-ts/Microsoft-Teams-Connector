@@ -1709,7 +1709,7 @@ function AddChannelMembers(parameters: SingleRecord, properties: SingleRecord, c
     if (!(typeof teamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
     if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
 
-    var url = baseUriEndpoint + "/teams/" + encodeURIComponent(teamId) + "/channels/" + encodeURIComponent(channelId) + "/members";
+    var url = baseUriEndpointBeta + "/teams/" + encodeURIComponent(teamId) + "/channels/" + encodeURIComponent(channelId) + "/members";
     ExecuteRequest(url, data, "POST", function (responseText) {
         if (typeof cb === 'function')
             cb(responseText);
