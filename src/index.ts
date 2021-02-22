@@ -2247,7 +2247,7 @@ function SendMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
         obj.mentions = GetMentions(properties, properties[ChannelMessageBody].toString());
     }
 
-    var data = JSON.stringify(data);
+    var data = JSON.stringify(obj);
 
     let channelTeamId = properties[ChannelTeamId];
     if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
