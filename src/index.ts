@@ -2265,20 +2265,18 @@ function SendMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
 function GetMentions(message)
 {
     var mentions = [];
+    
+    var matches = message.match(/<at[^>]*>.*?<\/at>/gm);
 
-    var iterator = message.matchAll(/<at[^>]*>(.*?)<\/at>/gm);
-    var next = iterator.next();
-    var count = 0;
-
-    while (next.done != false)
+    for (let i = 0; i < matches.length; i++)
     {
         var properties = {
-            ChannelUserPrincipalName: next[1]
+            ChannelUserPrincipalName: matches[i].replace(/<[^>]+>/g, '')
         };
 
         GetChannelUser(null, properties, function (b) {
             var mentionObj = {
-                "id": count,
+                "id": i,
                 "mentionText": b.displayName,
                 "mentioned": {
                     "application": null,
@@ -2293,8 +2291,6 @@ function GetMentions(message)
             };
             mentions.push(mentionObj);
         });
-        count++;
-        next = iterator.next();
     }
 
     return mentions;
