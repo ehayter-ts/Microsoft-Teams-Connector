@@ -99,6 +99,7 @@ const ChannelCreate = "create";
 const ChannelDelete = "delete";
 const ChannelUpdate = "update";
 const ChannelSendMessage = "sendMessage";
+const ChannelSendRichTextMessage = "sendRichTextMessage";
 const ChannelReplyMessage = "replyMessage";
 const ChannelAddMember = "addMember";
 
@@ -726,6 +727,20 @@ ondescribe = function () {
                             ChannelMessageBody
                         ],
                         outputs: [ChannelIsSuccessful]
+                    },
+                    [ChannelSendRichTextMessage]: {
+                        displayName: "Send Rich Text Message",
+                        description: "Sends a Message to a Channel",
+                        type: "create",
+                        inputs: [ChannelTeamId,
+                            ChannelId,
+                            ChannelMessageBody
+                        ],
+                        requiredInputs: [ChannelTeamId,
+                            ChannelId,
+                            ChannelMessageBody
+                        ],
+                        outputs: [ChannelIsSuccessful, ChannelMessageId]
                     }
                 }
             },
@@ -2004,6 +2019,9 @@ function onexecuteChannel(methodName: string, parameters: SingleRecord, properti
         case ChannelReplyMessage:
             onexecuteReplyMessage(parameters, properties);
             break;
+        case ChannelSendRichTextMessage:
+            onexecuteSendRichTextMessage(parameters, properties);
+            break;
         default: throw new Error("The channel method " + methodName + " is not supported...");
     }
 }
@@ -2238,6 +2256,29 @@ function onexecuteSendMessage(parameters: SingleRecord, properties: SingleRecord
     });
 }
 
+function onexecuteSendRichTextMessage(parameters: SingleRecord, properties: SingleRecord) {
+    SendRichTextMessage(parameters, properties, function (a) {
+        postResult({
+            [ChannelIsSuccessful]: true,
+            [ChannelMessageId]: a.id
+        });
+    });
+}
+
+function SendRichTextMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
+    let channelTeamId = properties[ChannelTeamId];
+    if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
+
+    let channelId = properties[ChannelId];
+    if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
+
+    var url = baseUriEndpointBeta + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId) + "/messages";
+    ExecuteRequest(url, properties[ChannelMessageBody].toString(), "POST", function (responseText) {
+        if (typeof cb === 'function')
+            cb(responseText);
+    });
+}
+
 function SendMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
     if (properties[ChannelMessageBody].toString().indexOf("<at") > -1) {
         GetUsers(function (u) {
@@ -2303,8 +2344,8 @@ function GetMentions(properties, message, payload) {
 
     for (let i = 0; i < matches.length; i++) {
         var displayName = matches[i].replace(/<[^>]+>/g, '');
-        var user = users.filter(function (item) {return item.displayName == displayName})
-        
+        var user = users.filter(function (item) { return item.displayName == displayName })
+
         var mentionObj = {
             "id": i,
             "mentionText": displayName,
