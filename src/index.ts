@@ -2239,13 +2239,26 @@ function SendMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
             "contentType": "html",
             "content": properties[ChannelMessageBody]
         },
-        "mentions": []
+        "mentions": [{
+            "id": 0,
+            "mentionText": "Ernie Hayter",
+            "mentioned": {
+                "application": null,
+                "device": null,
+                "conversation": null,
+                "user": {
+                    "id": "9d3824b5-8d42-458a-8275-7a60037ad925",
+                    "displayName": "Ernie Hayter",
+                    "userIdentityType": "aadUser"
+                }
+            }
+        }]
     };
 
-    if (properties[ChannelMessageBody].toString().indexOf("<at") > -1)
-    {
-        obj.mentions = GetMentions(properties, "" + properties[ChannelMessageBody]);
-    }
+    //if (properties[ChannelMessageBody].toString().indexOf("<at") > -1)
+    //{
+     //   obj.mentions = GetMentions(properties, "" + properties[ChannelMessageBody]);
+    //}
 
     var data = JSON.stringify(obj);
 
@@ -2266,7 +2279,7 @@ function GetMentions(properties, message)
 {
     var mentions = [];
     
-    var matches = message.match(/<at[^>]*>.*?<\/at>/gm);
+    //var matches = message.match(/<at[^>]*>.*?<\/at>/gm);
 
     //for (let i = 0; i < matches.length; i++)
     //{
