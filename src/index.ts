@@ -2313,7 +2313,7 @@ function GetMentions(properties, message, payload) {
                 "device": null,
                 "conversation": null,
                 "user": {
-                    "id": userItem.id,
+                    "id": user.id,
                     "displayName": displayName,
                     "userIdentityType": "aadUser"
                 }
