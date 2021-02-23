@@ -1666,6 +1666,14 @@ function GetChannelUser(parameters: SingleRecord, properties: SingleRecord, cb) 
     });
 }
 
+function GetUsers(cb) {
+    var url = baseUriEndpoint + "/users";
+    ExecuteRequest(url, null, "GET", function (responseText) {
+        if (typeof cb === 'function')
+            cb(responseText);
+    });
+}
+
 function AddGroupOwner(parameters: SingleRecord, properties: SingleRecord, cb) {
     var data = JSON.stringify({
         "@odata.id": baseUriEndpoint + "/users/" + properties[TeamUserId]
@@ -2025,8 +2033,8 @@ function onexecuteChannelAddMember(parameters: SingleRecord, properties: SingleR
                 postResult({
                     [ChannelIsSuccessful]: true
                 });
-           }
-       });
+            }
+        });
     });
 }
 
@@ -2231,78 +2239,88 @@ function onexecuteSendMessage(parameters: SingleRecord, properties: SingleRecord
 }
 
 function SendMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
-    var importance = properties[ChannelMessageIsImportant] == "true" ? "High" : "Normal";
-    var obj = {
-        "subject": properties[ChannelMessageSubject],
-        "importance": importance.toString(),
-        "body": {
-            "contentType": "html",
-            "content": properties[ChannelMessageBody]
-        },
-        "mentions": [{
-            "id": 0,
-            "mentionText": "Ernie Hayter",
+    if (properties[ChannelMessageBody].toString().indexOf("<at") > -1) {
+        GetUsers(function (u) {
+            var importance = properties[ChannelMessageIsImportant] == "true" ? "High" : "Normal";
+            var obj = {
+                "subject": properties[ChannelMessageSubject],
+                "importance": importance.toString(),
+                "body": {
+                    "contentType": "html",
+                    "content": properties[ChannelMessageBody]
+                },
+                "mentions": []
+            };
+
+            if (properties[ChannelMessageBody].toString().indexOf("<at") > -1) {
+                obj.mentions = GetMentions(properties, properties[ChannelMessageBody], u);
+            }
+
+            var data = JSON.stringify(obj);
+
+            let channelTeamId = properties[ChannelTeamId];
+            if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
+
+            let channelId = properties[ChannelId];
+            if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
+
+            var url = baseUriEndpointBeta + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId) + "/messages";
+            ExecuteRequest(url, data, "POST", function (responseText) {
+                if (typeof cb === 'function')
+                    cb(responseText);
+            });
+        });
+    }
+    else {
+        var importance = properties[ChannelMessageIsImportant] == "true" ? "High" : "Normal";
+        var data = JSON.stringify({
+            "subject": properties[ChannelMessageSubject],
+            "importance": importance.toString(),
+            "body": {
+                "contentType": "html",
+                "content": properties[ChannelMessageBody]
+            }
+        });
+
+        let channelTeamId = properties[ChannelTeamId];
+        if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
+
+        let channelId = properties[ChannelId];
+        if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
+
+        var url = baseUriEndpointBeta + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId) + "/messages";
+        ExecuteRequest(url, data, "POST", function (responseText) {
+            if (typeof cb === 'function')
+                cb(responseText);
+        });
+    }
+}
+
+function GetMentions(properties, message, payload) {
+    var mentions = [];
+    var users = payload.value;
+    var matches = message.match(/<at[^>]*>.*?<\/at>/gm);
+
+    for (let i = 0; i < matches.length; i++) {
+        var displayName = matches[i].replace(/<[^>]+>/g, '');
+        var user = users.filter(function (user) {return user.displayName == displayName})
+        
+        var mentionObj = {
+            "id": i,
+            "mentionText": displayName,
             "mentioned": {
                 "application": null,
                 "device": null,
                 "conversation": null,
                 "user": {
-                    "id": "9d3824b5-8d42-458a-8275-7a60037ad925",
-                    "displayName": "Ernie Hayter",
+                    "id": user.id,
+                    "displayName": displayName,
                     "userIdentityType": "aadUser"
                 }
             }
-        }]
-    };
-
-    //if (properties[ChannelMessageBody].toString().indexOf("<at") > -1)
-    //{
-     //   obj.mentions = GetMentions(properties, "" + properties[ChannelMessageBody]);
-    //}
-
-    var data = JSON.stringify(obj);
-
-    let channelTeamId = properties[ChannelTeamId];
-    if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
-
-    let channelId = properties[ChannelId];
-    if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
-
-    var url = baseUriEndpointBeta + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId) + "/messages";
-    ExecuteRequest(url, data, "POST", function (responseText) {
-        if (typeof cb === 'function')
-            cb(responseText);
-    });
-}
-
-function GetMentions(properties, message)
-{
-    var mentions = [];
-    
-    //var matches = message.match(/<at[^>]*>.*?<\/at>/gm);
-
-    //for (let i = 0; i < matches.length; i++)
-    //{
-        //properties[ChannelUserPrincipalName] = matches[i].replace(/<[^>]+>/g, '');
-
-        //GetChannelUser(null, properties, function (b) {
-            var mentionObj = {
-                "id": 0,
-                "mentionText": "Ernie Hayter",
-                "mentioned": {
-                    "application": null,
-                    "device": null,
-                    "conversation": null,
-                    "user": {
-                        "id": "9d3824b5-8d42-458a-8275-7a60037ad925",
-                        "displayName": "Ernie Hayter",
-                        "userIdentityType": "aadUser"
-                    }
-                }
-            };
-            mentions.push(mentionObj);
-        //});
-    //}
+        };
+        mentions.push(mentionObj);
+    }
 
     return mentions;
 }
