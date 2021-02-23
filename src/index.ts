@@ -2268,28 +2268,28 @@ function GetMentions(properties, message)
     
     var matches = message.match(/<at[^>]*>.*?<\/at>/gm);
 
-    for (let i = 0; i < matches.length; i++)
-    {
-        properties[ChannelUserPrincipalName] = matches[i].replace(/<[^>]+>/g, '');
+    //for (let i = 0; i < matches.length; i++)
+    //{
+        //properties[ChannelUserPrincipalName] = matches[i].replace(/<[^>]+>/g, '');
 
-        GetChannelUser(null, properties, function (b) {
+        //GetChannelUser(null, properties, function (b) {
             var mentionObj = {
-                "id": i,
-                "mentionText": b.displayName,
+                "id": 0,
+                "mentionText": "Ernie Hayter",
                 "mentioned": {
                     "application": null,
                     "device": null,
                     "conversation": null,
                     "user": {
-                        "id": b.id,
-                        "displayName": b.displayName,
+                        "id": "9d3824b5-8d42-458a-8275-7a60037ad925",
+                        "displayName": "Ernie Hayter",
                         "userIdentityType": "aadUser"
                     }
                 }
             };
             mentions.push(mentionObj);
-        });
-    }
+        //});
+    //}
 
     return mentions;
 }
