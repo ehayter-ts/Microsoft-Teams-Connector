@@ -2303,7 +2303,7 @@ function GetMentions(properties, message, payload) {
 
     for (let i = 0; i < matches.length; i++) {
         var displayName = matches[i].replace(/<[^>]+>/g, '');
-        var user = users.filter(function (user) {return user.displayName == displayName})
+        var user = users.filter(function (item) {return item.displayName == displayName})
         
         var mentionObj = {
             "id": i,
@@ -2313,7 +2313,7 @@ function GetMentions(properties, message, payload) {
                 "device": null,
                 "conversation": null,
                 "user": {
-                    "id": user.id,
+                    "id": userItem.id,
                     "displayName": displayName,
                     "userIdentityType": "aadUser"
                 }
