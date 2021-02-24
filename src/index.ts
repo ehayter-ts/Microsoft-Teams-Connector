@@ -99,7 +99,7 @@ const ChannelCreate = "create";
 const ChannelDelete = "delete";
 const ChannelUpdate = "update";
 const ChannelSendMessage = "sendMessage";
-const ChannelSendRichTextMessage = "sendRichTextMessage";
+const ChannelSendAdaptiveCard = "sendAdaptiveCard";
 const ChannelReplyMessage = "replyMessage";
 const ChannelAddMember = "addMember";
 
@@ -728,8 +728,8 @@ ondescribe = function () {
                         ],
                         outputs: [ChannelIsSuccessful]
                     },
-                    [ChannelSendRichTextMessage]: {
-                        displayName: "Send Rich Text Message",
+                    [ChannelSendAdaptiveCard]: {
+                        displayName: "Send Adaptive Card",
                         description: "Sends a Message to a Channel",
                         type: "create",
                         inputs: [ChannelTeamId,
@@ -2019,8 +2019,8 @@ function onexecuteChannel(methodName: string, parameters: SingleRecord, properti
         case ChannelReplyMessage:
             onexecuteReplyMessage(parameters, properties);
             break;
-        case ChannelSendRichTextMessage:
-            onexecuteSendRichTextMessage(parameters, properties);
+        case ChannelSendAdaptiveCard:
+            onexecuteSendAdaptiveCard(parameters, properties);
             break;
         default: throw new Error("The channel method " + methodName + " is not supported...");
     }
@@ -2256,8 +2256,8 @@ function onexecuteSendMessage(parameters: SingleRecord, properties: SingleRecord
     });
 }
 
-function onexecuteSendRichTextMessage(parameters: SingleRecord, properties: SingleRecord) {
-    SendRichTextMessage(parameters, properties, function (a) {
+function onexecuteSendAdaptiveCard(parameters: SingleRecord, properties: SingleRecord) {
+    SendAdaptiveCard(parameters, properties, function (a) {
         postResult({
             [ChannelIsSuccessful]: true,
             [ChannelMessageId]: a.id
@@ -2265,15 +2265,32 @@ function onexecuteSendRichTextMessage(parameters: SingleRecord, properties: Sing
     });
 }
 
-function SendRichTextMessage(parameters: SingleRecord, properties: SingleRecord, cb) {
+function SendAdaptiveCard(parameters: SingleRecord, properties: SingleRecord, cb) {
     let channelTeamId = properties[ChannelTeamId];
     if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
 
     let channelId = properties[ChannelId];
     if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
 
+    var data = JSON.stringify(
+        {
+            "subject": null,
+            "body": {
+                "contentType": "html",
+                "content": "<attachment id=\"74d20c7f34aa4a7fb74e2b30004247c5\"></attachment>"
+            },
+            "attachments": [
+                {
+                    "id": "74d20c7f34aa4a7fb74e2b30004247c5",
+                    "contentType": "application/vnd.microsoft.card.adaptive",
+                    "content": properties[ChannelMessageBody].toString()
+                }
+            ]
+        }
+    );
+
     var url = baseUriEndpointBeta + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId) + "/messages";
-    ExecuteRequest(url, properties[ChannelMessageBody].toString(), "POST", function (responseText) {
+    ExecuteRequest(url, data, "POST", function (responseText) {
         if (typeof cb === 'function')
             cb(responseText);
     });
