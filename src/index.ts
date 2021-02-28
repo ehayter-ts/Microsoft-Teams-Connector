@@ -2541,8 +2541,15 @@ function onexecuteTabCreate(methodName: string, parameters: SingleRecord, proper
 }
 
 
-function prepareDataAndCreateTab(parameters: SingleRecord, properties: SingleRecord, requestBody: string) {
-    CreateTab(parameters, properties, requestBody, function (a) {
+function prepareDataAndCreateTab(parameters: SingleRecord, properties: SingleRecord, requestBody) {
+    requestBody.configuration = {
+        "entityId": properties[TabConfigEntityId],
+        "contentUrl": properties[TabConfigContentUrl],
+        "removeUrl": properties[TabConfigRemoveUrl],
+        "websiteUrl": properties[TabConfigWebsiteUrl]
+    };
+
+    CreateTab(parameters, properties, JSON.stringify(requestBody), function (a) {
         // CreateAndReturnChannelObject(parameters, properties);
         postResult({
             [TabId]: a.id,
@@ -2575,88 +2582,88 @@ function getRequestBody(tabType: string, properties) {
     var data;
     switch (tabType) {
         case "Word":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/com.microsoft.teamspace.tab.file.staticviewer.word"
-            });
+            };
             break;
         case "Excel":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/com.microsoft.teamspace.tab.file.staticviewer.excel"
-            });
+            };
             break;
         case "Powerpoint":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/com.microsoft.teamspace.tab.file.staticviewer.powerpoint"
-            });
+            };
             break;
         case "PDF":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/com.microsoft.teamspace.tab.file.staticviewer.pdf"
-            });
+            };
             break;
         case "OneNote":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/0d820ecd-def2-4297-adad-78056cde7c78"
-            });
+            };
             break;
         case "Planner":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/com.microsoft.teamspace.tab.planner"
-            });
+            };
             break;
         case "SharePoint":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/2a527703-1f6f-4559-a332-d8a7d288cd88"
-            });
+            };
             break;
         case "MicrosoftForms":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/81fef3a6-72aa-4648-a763-de824aeafb7d"
-            });
+            };
             break;
         case "MicrosoftStream":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/com.microsoftstream.embed.skypeteamstab"
-            });
+            };
             break;
         case "Website":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/com.microsoft.teamspace.tab.web"
-            });
+            };
             break;
         case "Wiki":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/com.microsoft.teamspace.tab.wiki"
-            });
+            };
             break;
         case "PowerBI":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/com.microsoft.teamspace.tab.powerbi"
-            });
+            };
             break;
         case "DocumentLibrary":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/com.microsoft.teamspace.tab.files.sharepoint"
-            });
+            };
             break;
         case "Custom":
-            data = JSON.stringify({
+            data = {
                 "displayName": properties[TabDisplayName],
                 "teamsApp@odata.bind": "https://graph.microsoft.com/v1.0/appCatalogs/teamsApps/" + properties[TabTeamsAppAppId]
-            });
+            };
             break;
         default: throw new Error("Tab Type is not supported or app is not installed!");
     }
