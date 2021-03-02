@@ -17,6 +17,7 @@ const Team = "team";
 const Channel = "channel";
 const Tab = "tab";
 const App = "app";
+const Token = "token";
 
 //
 // Team
@@ -151,6 +152,15 @@ const AppTeamAppDefinitionId = "teamsAppDefinitionId";
 const AppTeamsAppId = "teamsAppId";
 
 const AppList = "list";
+
+//
+// Token
+const TokenLifetime = "tokenLifeTime";
+const TokenPolicyDisplayName = "displayName";
+const TokenOrganizationDefault = "isOrganizationDefault";
+const TokenUpdateSuccess = "updateSuccess";
+
+const TokenPolicySet = "setToken";
 
 //OnDescribe
 ondescribe = function () {
@@ -1298,6 +1308,41 @@ ondescribe = function () {
                         ]
                     }
                 }
+            },
+            [Token]: {
+                displayName: "Token",
+                description: "Token",
+                properties: {
+                    [TokenLifetime]: {
+                        displayName: "Token Lifetime (hh:mm:ss)",
+                        description: "Token Lifetime (hh:mm:ss)",
+                        type: "string"
+                    },
+                    [TokenPolicyDisplayName]: {
+                        displayName: "Policy Display Name",
+                        description: "Policy Display Name",
+                        type: "string"
+                    },
+                    [TokenOrganizationDefault]: {
+                        displayName: "Is Organization Default",
+                        description: "Is Organization Default",
+                        type: "boolean"
+                    },
+                    [TokenUpdateSuccess]: {
+                        displayName: "Policy Update Success",
+                        description: "Policy Update Success",
+                        type: "boolean"
+                    }
+                },
+                methods: {
+                    [TokenPolicySet]: {
+                        displayName: "Set Token Policy",
+                        type: "execute",
+                        inputs: [TokenLifetime, TokenPolicyDisplayName, TokenOrganizationDefault],
+                        requiredInputs: [TokenLifetime, TokenPolicyDisplayName],
+                        outputs: [TokenUpdateSuccess]
+                    }
+                }
             }
         }
 
@@ -1319,6 +1364,9 @@ onexecute = function ({ objectName, methodName, parameters, properties }) {
         case App:
             onexecuteApp(methodName, parameters, properties);
             break;
+        case Token:
+            onexecuteToken(methodName, parameters, properties);
+            break;
         default: throw new Error("The object " + objectName + " is not supported.");
     }
 }
@@ -1327,6 +1375,15 @@ function onexecuteApp(methodName: string, parameters: SingleRecord, properties: 
     switch (methodName) {
         case AppList:
             onexecuteInstalledAppList(parameters, properties);
+            break;
+        default: throw new Error("The method " + methodName + " is not supported..");
+    }
+}
+
+function onexecuteToken(methodName: string, parameters: SingleRecord, properties: SingleRecord) {
+    switch (methodName) {
+        case TokenPolicySet:
+            onexecutePolicySet(parameters, properties);
             break;
         default: throw new Error("The method " + methodName + " is not supported..");
     }
@@ -2721,6 +2778,35 @@ function onexecuteInstalledAppList(parameters: SingleRecord, properties: SingleR
                 [AppTeamsAppId]: x.teamsAppDefinition.teamsAppId
             };
         }));
+    });
+}
+
+function onexecutePolicySet(parameters: SingleRecord, properties: SingleRecord) {
+    SetTokenPolicy(parameters, properties, function (a) {
+        postResult({[TokenUpdateSuccess]: a.TokenUpdateSuccess});
+    });
+}
+
+function SetTokenPolicy(parameters: SingleRecord, properties: SingleRecord, cb) {
+    let tokenLifetime = properties[TokenLifetime];
+    let policyDisplayName = properties[TokenPolicyDisplayName];
+    let isOrgDefault = properties[TokenOrganizationDefault].toString() == "true";
+
+    if (!(typeof tokenLifetime === "string")) throw new Error("properties[TokenLifetime] is not of type string");
+    if (!(typeof policyDisplayName === "string")) throw new Error("properties[TokenPolicyDisplayName] is not of type string");
+
+    var data = JSON.stringify({
+        "definition": [
+            "{\"TokenLifetimePolicy\":{\"Version\":1,\"AccessTokenLifetime\":\"" + tokenLifetime + "\"}}"
+        ],
+        "displayName": policyDisplayName,
+        "isOrganizationDefault": isOrgDefault
+    });
+
+    var url = baseUriEndpointBeta + "/policies/tokenLifetimePolicies";
+    ExecuteRequest(url, data, "POST", function (responseText) {
+        if (typeof cb === 'function')
+            cb({TokenUpdateSuccess: true});
     });
 }
 
