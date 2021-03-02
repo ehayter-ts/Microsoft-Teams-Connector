@@ -1249,7 +1249,10 @@ ondescribe = function () {
                         inputs: [TabTeamId,
                             TabChannelId,
                             TabId,
-                            TabDisplayName
+                            TabDisplayName,
+                            TabConfigContentUrl,
+                            TabConfigWebsiteUrl,
+                            TabConfigRemoveUrl
                         ],
                         requiredInputs: [TabTeamId,
                             TabChannelId,
@@ -2518,7 +2521,10 @@ function onexecuteTabUpdate(parameters: SingleRecord, properties: SingleRecord) 
 
 function UpdateTab(parameters: SingleRecord, properties: SingleRecord, cb) {
     var data = JSON.stringify({
-        "displayName": properties[TabDisplayName]
+        "displayName": properties[TabDisplayName],
+        "contentUrl": properties[TabConfigContentUrl],
+        "removeUrl": properties[TabConfigRemoveUrl],
+        "websiteUrl": properties[TabConfigWebsiteUrl],
     });
 
     let tabTeamId = properties[TabTeamId];
