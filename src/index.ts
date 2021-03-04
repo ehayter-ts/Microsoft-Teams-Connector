@@ -2354,7 +2354,7 @@ function GetCleanedMessage(messageObject) {
     var message = messageObject.body.content;
 
     if (message.indexOf('<attachment id="74d20c7f34aa4a7fb74e2b30004247c5"></attachment>') > -1) {
-        message = "";
+        var tempMessage = "";
         var card = messageObject.attachments[0].content;
         var cardObject = JSON.parse(card);
 
@@ -2368,12 +2368,13 @@ function GetCleanedMessage(messageObject) {
                             var boldEndTag = boldStartTag == "<b>" ? "</b>" : "";
                             var endTag = startTag == "<h3>" ? "</h3>" : "</span>";
 
-                            message += `<div class='teams-message-row'>${startTag}${boldStartTag}${i.text}${boldEndTag}${endTag}</div>`;
+                            tempMessage += `<div class='teams-message-row'>${startTag}${boldStartTag}${i.text}${boldEndTag}${endTag}</div>`;
                         }
                     });
                 });
             }
         });
+        message = message.replace('<attachment id="74d20c7f34aa4a7fb74e2b30004247c5"></attachment>', tempMessage);
     }
     
     message = message.replace("<at", "<b").replace("</at>", "</b>");
