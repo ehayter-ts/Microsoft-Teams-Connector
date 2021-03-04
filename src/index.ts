@@ -2344,7 +2344,7 @@ function GetChannelMessages(parameters: SingleRecord, properties: SingleRecord, 
         if (typeof cb === 'function') {
             //console.log(`GET Succeeded: ${responseText}`);
             var messages = responseText.value.map(x => { return { "id": x.id, "message": GetCleanedMessage(x), "user": x.from.user.displayName, "date": x.createdDateTime } })
-            console.log(messages);
+            //console.log(messages);
             cb(messages);
         }
     });
@@ -2358,25 +2358,29 @@ function GetCleanedMessage(messageObject) {
         var card = messageObject.attachments[0].content;
         var cardObject = JSON.parse(card);
 
-        cardObject.body.forEach(b => {
-            if (b.type == "ColumnSet") {
-                b.columns.forEach(c => {
-                    c.items.forEach(i => {
-                        if (i.type == "TextBlock") {
-                            var startTag = i.size != undefined && i.size == "large" ? "<h3>" : "<span>";
-                            var boldStartTag = i.weight != undefined && i.weight == "bolder" ? "<b>" : "";
-                            var boldEndTag = boldStartTag == "<b>" ? "</b>" : "";
-                            var endTag = startTag == "<h3>" ? "</h3>" : "</span>";
+        if (cardObject.body != undefined) {
+            cardObject.body.forEach(b => {
+                if (b.type == "ColumnSet") {
+                    b.columns.forEach(c => {
+                        c.items.forEach(i => {
+                            if (i.type == "TextBlock") {
+                                var startTag = i.size != undefined && i.size == "large" ? "<h3>" : "<span>";
+                                var boldStartTag = i.weight != undefined && i.weight == "bolder" ? "<b>" : "";
+                                var boldEndTag = boldStartTag == "<b>" ? "</b>" : "";
+                                var endTag = startTag == "<h3>" ? "</h3>" : "</span>";
 
-                            tempMessage += `<div class='teams-message-row'>${startTag}${boldStartTag}${i.text}${boldEndTag}${endTag}</div>`;
-                        }
+                                tempMessage += `<div class='teams-message-row'>${startTag}${boldStartTag}${i.text}${boldEndTag}${endTag}</div>`;
+                            }
+                        });
                     });
-                });
-            }
-        });
+                }
+            });
+        } else {
+            message = cardObject.text;
+        }
         message = message.replace('<attachment id="74d20c7f34aa4a7fb74e2b30004247c5"></attachment>', tempMessage);
     }
-    
+
     message = message.replace("<at", "<b").replace("</at>", "</b>");
 
     return message;
