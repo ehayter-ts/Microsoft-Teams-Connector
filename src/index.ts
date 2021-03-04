@@ -2338,7 +2338,7 @@ function GetChannelMessages(parameters: SingleRecord, properties: SingleRecord, 
     let channelId = properties[ChannelId];
     if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
 
-    var url = baseUriEndpoint + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId) + "/messages";
+    var url = baseUriEndpointBeta + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId) + "/messages";
 
     ExecuteRequest(url, null, "GET", function (responseText) {
         if (typeof cb === 'function') {
