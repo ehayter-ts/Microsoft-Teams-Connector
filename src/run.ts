@@ -90,9 +90,9 @@ class XHR {
 mock('XMLHttpRequest', XHR);
 
 onexecute({
-    objectName: 'channel',
-    methodName: 'getDrive',
-    properties: {"teamId":"38a1ad5f-7d84-4533-8688-741f9bcaa060","id":"19:46eadc3a0c4a41f2b7ac3f5a237a3fa7@thread.tacv2"},
+    objectName: 'drive',
+    methodName: 'driveGetChildren',
+    properties: {"driveId":"b!liodivvnrU-bPFrG3o3bbi7jqbPXfwNMpXRs9nQguBPg5GIl5jhySrx21t1R0Dbs","drivePath":"Recordings"},
     parameters: {},
     configuration: {},
     schema: {}
