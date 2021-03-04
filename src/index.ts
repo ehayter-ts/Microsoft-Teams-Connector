@@ -1846,7 +1846,7 @@ function RemoveGroupMembers(parameters: SingleRecord, properties: SingleRecord, 
 function ExecuteRequest(url: string, data: string, requestType: string, cb) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
-        console.log("ExecuteRequest XHR status: " + xhr.status + "," + xhr.responseText);
+        //console.log("ExecuteRequest XHR status: " + xhr.status + "," + xhr.responseText);
         if (xhr.readyState !== 4)
             return;
         if (xhr.status == 201) {
@@ -2330,7 +2330,7 @@ function GetChannelList(parameters: SingleRecord, properties: SingleRecord, cb) 
 }
 
 function GetChannelMessages(parameters: SingleRecord, properties: SingleRecord, cb) {
-    console.log(`GetChannelMessages Started: Team ID:${properties[ChannelTeamId]} Channel ID:${properties[ChannelId]}`);
+    //console.log(`GetChannelMessages Started: Team ID:${properties[ChannelTeamId]} Channel ID:${properties[ChannelId]}`);
     let channelTeamId = properties[ChannelTeamId];
 
     if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
@@ -2342,7 +2342,7 @@ function GetChannelMessages(parameters: SingleRecord, properties: SingleRecord, 
 
     ExecuteRequest(url, null, "GET", function (responseText) {
         if (typeof cb === 'function') {
-            console.log(`GET Succeeded: ${responseText}`);
+            //console.log(`GET Succeeded: ${responseText}`);
             var messages = responseText.value.map(x => { return { "id": x.id, "message": GetCleanedMessage(x), "user": x.from.user.displayName, "date": x.createdDateTime } })
             console.log(messages);
             cb(messages);
@@ -2353,7 +2353,7 @@ function GetChannelMessages(parameters: SingleRecord, properties: SingleRecord, 
 function GetCleanedMessage(messageObject) {
     var message = messageObject.body.content;
 
-    if (message == '<attachment id="74d20c7f34aa4a7fb74e2b30004247c5"></attachment>') {
+    if (message.indexOf('<attachment id="74d20c7f34aa4a7fb74e2b30004247c5"></attachment>') > -1) {
         message = "";
         var card = messageObject.attachments[0].content;
         var cardObject = JSON.parse(card);
@@ -2375,6 +2375,8 @@ function GetCleanedMessage(messageObject) {
             }
         });
     }
+    
+    message = message.replace("<at", "<b").replace("</at>", "</b>");
 
     return message;
 }
