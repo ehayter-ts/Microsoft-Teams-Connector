@@ -2179,7 +2179,7 @@ function GetDriveRootChildren(parameters: SingleRecord, properties: SingleRecord
     let driveId = properties[DriveId];
     if (!(typeof driveId === "string")) throw new Error("properties[DriveId] is not of type string");
 
-    var url = baseUriEndpoint + "/drives/" + encodeURIComponent(driveId) + "/root/children";
+    var url = baseUriEndpoint + "/sites/root/drives/" + encodeURIComponent(driveId) + "/root/children";
     ExecuteRequest(url, null, "GET", function (responseText) {
         if (typeof cb === 'function')
             cb(responseText);
