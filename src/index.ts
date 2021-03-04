@@ -95,6 +95,8 @@ const ChannelUserPrincipalName = "userPrincipalName";
 const ChannelUserId = "userId";
 const ChannelMessageUser = "messageUser";
 const ChannelMessageDate = "messageDate";
+const ChannelDriveId = "driveId";
+const ChannelDriveUrl = "driveUrl";
 
 const ChannelGet = "get";
 const ChannelList = "list";
@@ -106,6 +108,7 @@ const ChannelSendAdaptiveCard = "sendAdaptiveCard";
 const ChannelReplyMessage = "replyMessage";
 const ChannelAddMember = "addMember";
 const ChannelMessages = "getMessages";
+const ChannelGetDrive = "getDrive";
 
 
 //
@@ -626,6 +629,16 @@ ondescribe = function () {
                         displayName: "Message User",
                         description: "Message User",
                         type: "string"
+                    },
+                    [ChannelDriveId]: {
+                        displayName: "Drive ID",
+                        description: "Drive ID",
+                        type: "string"
+                    },
+                    [ChannelDriveUrl]: {
+                        displayName: "Drive URL",
+                        description: "Drive URL",
+                        type: "string"
                     }
                 },
                 methods: {
@@ -776,6 +789,18 @@ ondescribe = function () {
                             ChannelId
                         ],
                         outputs: [ChannelMessageId, ChannelMessageBody, ChannelMessageDate, ChannelMessageUser]
+                    },
+                    [ChannelGetDrive]: {
+                        displayName: "Get Channel Drive",
+                        description: "Get Channel Drive",
+                        type: "read",
+                        inputs: [ChannelTeamId,
+                            ChannelId
+                        ],
+                        requiredInputs: [ChannelTeamId,
+                            ChannelId
+                        ],
+                        outputs: [ChannelDriveId, ChannelDriveUrl]
                     }
                 }
             },
@@ -2111,6 +2136,9 @@ function onexecuteChannel(methodName: string, parameters: SingleRecord, properti
         case ChannelMessages:
             onexecuteGetChannelMessages(parameters, properties);
             break;
+        case ChannelGetDrive:
+            onexecuteGetChannelDrive(parameters, properties);
+            break;
         default: throw new Error("The channel method " + methodName + " is not supported...");
     }
 }
@@ -2251,6 +2279,15 @@ function onexecuteChannelUpdate(parameters: SingleRecord, properties: SingleReco
     });
 }
 
+function onexecuteGetChannelDrive(parameters: SingleRecord, properties: SingleRecord) {
+    GetChannelDrive(parameters, properties, function (a) {
+        postResult({
+            [ChannelDriveId]: a.parentReference.driveId,
+            [ChannelDriveUrl]: a.webUrl
+        });
+    });
+}
+
 function onexecuteChannelDelete(parameters: SingleRecord, properties: SingleRecord) {
     DeleteChannel(parameters, properties, function (a) {
         postResult({
@@ -2312,6 +2349,20 @@ function GetChannel(parameters: SingleRecord, properties: SingleRecord, cb) {
     if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
 
     var url = baseUriEndpoint + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId);
+    ExecuteRequest(url, null, "GET", function (responseText) {
+        if (typeof cb === 'function')
+            cb(responseText);
+    });
+}
+
+function GetChannelDrive(parameters: SingleRecord, properties: SingleRecord, cb) {
+    let channelTeamId = properties[ChannelTeamId];
+    if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
+
+    let channelId = properties[ChannelId];
+    if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
+
+    var url = baseUriEndpoint + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId) + "/filesFolder";
     ExecuteRequest(url, null, "GET", function (responseText) {
         if (typeof cb === 'function')
             cb(responseText);
