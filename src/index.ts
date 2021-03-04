@@ -177,11 +177,12 @@ const DriveChildId = "driveChildId";
 const DriveChildWebUrl = "driveChildWebUrl";
 const DriveChildDownloadUrl = "driveChildDownloadUrl";
 const DriveChildFileName = "driveChildFileName";
+const DriveChildFolderName = "driveChildFolderName";
 const DriveChildFileCreated = "driveChildFileCreatedDate";
 const DriveChildFileCreatedBy = "driveChildFileCreatedBy";
 const DriveChildFileType = "driveChildFileType";
 
-const DriveGetChildren = "driveGetChildren";
+const DriveGetRootChildren = "driveGetRootChildren";
 
 
 //OnDescribe
@@ -1461,15 +1462,20 @@ ondescribe = function () {
                         displayName: "Web URL",
                         description: "Web URL",
                         type: "string"
+                    },
+                    [DriveChildFolderName]: {
+                        displayName: "Folder Name",
+                        description: "Folder Name",
+                        type: "string"
                     }
                 },
                 methods: {
-                    [DriveGetChildren]: {
-                        displayName: "Get Drive Children",
+                    [DriveGetRootChildren]: {
+                        displayName: "Get Drive Root Children",
                         type: "list",
-                        inputs: [DriveId, DriveRelativePath],
-                        requiredInputs: [DriveId, DriveRelativePath],
-                        outputs: [DriveChildId, DriveChildFileName, DriveChildDownloadUrl, DriveChildWebUrl, DriveChildFileType, DriveChildFileCreated, DriveChildFileCreatedBy]
+                        inputs: [DriveId],
+                        requiredInputs: [DriveId],
+                        outputs: [DriveChildId, DriveChildFolderName, DriveChildWebUrl]
                     }
                 }
             }
@@ -1523,8 +1529,8 @@ function onexecuteToken(methodName: string, parameters: SingleRecord, properties
 
 function onexecuteDrive(methodName: string, parameters: SingleRecord, properties: SingleRecord) {
     switch (methodName) {
-        case DriveGetChildren:
-            onexecuteGetDriveChildren(parameters, properties);
+        case DriveGetRootChildren:
+            onexecuteGetDriveRootChildren(parameters, properties);
             break;
         default: throw new Error("The method " + methodName + " is not supported..");
     }
@@ -2083,18 +2089,14 @@ function onexecuteTeamMyTeamsList(parameters: SingleRecord, properties: SingleRe
     });
 }
 
-function onexecuteGetDriveChildren(parameters: SingleRecord, properties: SingleRecord) {
-    GetDriveChildren(parameters, properties, function (a) {
+function onexecuteGetDriveRootChildren(parameters: SingleRecord, properties: SingleRecord) {
+    GetDriveRootChildren(parameters, properties, function (a) {
         //console.log(a);
         postResult(a.value.map(x => {
             return {
                 [DriveChildId]: x.id,
-                [DriveChildFileName]: x.name,
-                [DriveChildDownloadUrl]: x["@microsoft.graph.downloadUrl"],
-                [DriveChildWebUrl]: x.webUrl,
-                [DriveChildFileType]: x.file.mimeType,
-                [DriveChildFileCreated]: x.createdDateTime,
-                [DriveChildFileCreatedBy]: x.createdBy.user.displayName
+                [DriveChildFolderName]: x.name,
+                [DriveChildWebUrl]: x.webUrl
             };
         }));
     });
@@ -2173,14 +2175,11 @@ function CheckArchivalStatus(parameters: SingleRecord, properties: SingleRecord,
     });
 }
 
-function GetDriveChildren(parameters: SingleRecord, properties: SingleRecord, cb) {
+function GetDriveRootChildren(parameters: SingleRecord, properties: SingleRecord, cb) {
     let driveId = properties[DriveId];
     if (!(typeof driveId === "string")) throw new Error("properties[DriveId] is not of type string");
 
-    let rootPath = properties[DriveRelativePath];
-    if (!(typeof rootPath === "string")) throw new Error("properties[DriveRelativePath] is not of type string");
-
-    var url = baseUriEndpoint + "/drives/" + encodeURIComponent(driveId) + "/special/" + encodeURIComponent(rootPath) + "/children";
+    var url = baseUriEndpoint + "/drives/" + encodeURIComponent(driveId) + "/root/children";
     ExecuteRequest(url, null, "GET", function (responseText) {
         if (typeof cb === 'function')
             cb(responseText);

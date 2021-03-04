@@ -91,8 +91,8 @@ mock('XMLHttpRequest', XHR);
 
 onexecute({
     objectName: 'drive',
-    methodName: 'driveGetChildren',
-    properties: {"driveId":"b!liodivvnrU-bPFrG3o3bbi7jqbPXfwNMpXRs9nQguBPg5GIl5jhySrx21t1R0Dbs","drivePath":"Recordings"},
+    methodName: 'driveGetRootChildren',
+    properties: {"driveId":"b!liodivvnrU-bPFrG3o3bbi7jqbPXfwNMpXRs9nQguBPg5GIl5jhySrx21t1R0Dbs"},
     parameters: {},
     configuration: {},
     schema: {}
