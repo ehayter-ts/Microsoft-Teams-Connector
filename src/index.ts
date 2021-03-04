@@ -1959,7 +1959,7 @@ function RemoveGroupMembers(parameters: SingleRecord, properties: SingleRecord, 
 function ExecuteRequest(url: string, data: string, requestType: string, cb) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
-        //console.log("ExecuteRequest XHR status: " + xhr.status + "," + xhr.responseText);
+        console.log("ExecuteRequest XHR status: " + xhr.status + "," + xhr.responseText);
         if (xhr.readyState !== 4)
             return;
         if (xhr.status == 201) {
