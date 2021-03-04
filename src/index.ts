@@ -2329,6 +2329,7 @@ function GetChannelList(parameters: SingleRecord, properties: SingleRecord, cb) 
 }
 
 function GetChannelMessages(parameters: SingleRecord, properties: SingleRecord, cb) {
+    console.log(`GetChannelMessages Started: Team ID:${properties[ChannelTeamId]} Channel ID:${properties[ChannelId]}`);
     let channelTeamId = properties[ChannelTeamId];
 
     if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
@@ -2340,7 +2341,9 @@ function GetChannelMessages(parameters: SingleRecord, properties: SingleRecord, 
 
     ExecuteRequest(url, null, "GET", function (responseText) {
         if (typeof cb === 'function') {
+            console.log(`GET Succeeded: ${responseText}`);
             var messages = responseText.value.map(x => { return { "id": x.id, "message": GetCleanedMessage(x), "user": x.from.user.displayName, "date": x.createdDateTime } })
+            console.log(messages);
             cb(messages);
         }
     });
