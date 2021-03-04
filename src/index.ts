@@ -616,6 +616,16 @@ ondescribe = function () {
                         displayName: "User Principal Name",
                         description: "Principal Name of User",
                         type: "string"
+                    },
+                    [ChannelMessageDate]: {
+                        displayName: "Message Date",
+                        description: "Message Date",
+                        type: "dateTime"
+                    },
+                    [ChannelMessageUser]: {
+                        displayName: "Message User",
+                        description: "Message User",
+                        type: "string"
                     }
                 },
                 methods: {
