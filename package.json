@@ -18,6 +18,7 @@
     "k2-broker"
   ],
   "scripts": {
+    "build dev and debug built index.ts": "npm run build:bundle-dev && node ./dist/run.js",
     "build": "npm run build:bundle-prod",
     "build:dev": "npm run build:bundle-dev",
     "build:bundle-dev": "node node_modules/rollup/dist/bin/rollup -c --environment NODE_ENV:development",
@@ -62,5 +63,8 @@
     "rollup": "^2.7.6",
     "rollup-plugin-babel": "4.3.3",
     "rollup-plugin-terser": "5.2.0"
+  },
+  "dependencies": {
+    "request": "^2.88.2"
   }
 }

@@ -2340,7 +2340,7 @@ function GetChannelMessages(parameters: SingleRecord, properties: SingleRecord, 
 
     ExecuteRequest(url, null, "GET", function (responseText) {
         if (typeof cb === 'function') {
-            var messages = JSON.parse(responseText).value.map(x => { return { "id": x.id, "message": GetCleanedMessage(x), "user": x.from.user.displayName, "date": x.createdDateTime } })
+            var messages = responseText.value.map(x => { return { "id": x.id, "message": GetCleanedMessage(x), "user": x.from.user.displayName, "date": x.createdDateTime } })
             cb(messages);
         }
     });
@@ -2350,6 +2350,7 @@ function GetCleanedMessage(messageObject) {
     var message = messageObject.body.content;
 
     if (message == '<attachment id="74d20c7f34aa4a7fb74e2b30004247c5"></attachment>') {
+        message = "";
         var card = messageObject.attachments[0].content;
         var cardObject = JSON.parse(card);
 
