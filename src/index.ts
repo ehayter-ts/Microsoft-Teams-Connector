@@ -2180,7 +2180,7 @@ function GetDriveChildren(parameters: SingleRecord, properties: SingleRecord, cb
     let rootPath = properties[DriveRelativePath];
     if (!(typeof rootPath === "string")) throw new Error("properties[DriveRelativePath] is not of type string");
 
-    var url = baseUriEndpointBeta + "/drives/" + encodeURIComponent(driveId) + "/root:/" + encodeURIComponent(rootPath) + ":/children";
+    var url = baseUriEndpointBeta + "/drives/" + encodeURIComponent(driveId) + "/special/" + encodeURIComponent(rootPath) + "/children";
     ExecuteRequest(url, null, "GET", function (responseText) {
         if (typeof cb === 'function')
             cb(responseText);
