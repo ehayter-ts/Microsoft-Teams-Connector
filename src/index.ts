@@ -93,6 +93,8 @@ const ChannelMessageIsImportant = "messageIsImportant";
 const MembershipType = "membershipType";
 const ChannelUserPrincipalName = "userPrincipalName";
 const ChannelUserId = "userId";
+const ChannelMessageUser = "messageUser";
+const ChannelMessageDate = "messageDate";
 
 const ChannelGet = "get";
 const ChannelList = "list";
@@ -103,6 +105,7 @@ const ChannelSendMessage = "sendMessage";
 const ChannelSendAdaptiveCard = "sendAdaptiveCard";
 const ChannelReplyMessage = "replyMessage";
 const ChannelAddMember = "addMember";
+const ChannelMessages = "getMessages";
 
 
 //
@@ -751,6 +754,18 @@ ondescribe = function () {
                             ChannelMessageBody
                         ],
                         outputs: [ChannelIsSuccessful, ChannelMessageId]
+                    },
+                    [ChannelMessages]: {
+                        displayName: "Get Messages in a Channel",
+                        description: "Get Messages in a Channel",
+                        type: "list",
+                        inputs: [ChannelTeamId,
+                            ChannelId
+                        ],
+                        requiredInputs: [ChannelTeamId,
+                            ChannelId
+                        ],
+                        outputs: [ChannelMessageId, ChannelMessageBody, ChannelMessageDate, ChannelMessageUser]
                     }
                 }
             },
@@ -2082,6 +2097,9 @@ function onexecuteChannel(methodName: string, parameters: SingleRecord, properti
         case ChannelSendAdaptiveCard:
             onexecuteSendAdaptiveCard(parameters, properties);
             break;
+        case ChannelMessages:
+            onexecuteGetChannelMessages(parameters, properties);
+            break;
         default: throw new Error("The channel method " + methodName + " is not supported...");
     }
 }
@@ -2179,6 +2197,19 @@ function onexecuteChannelList(parameters: SingleRecord, properties: SingleRecord
                 [ChannelDisplayName]: x.displayName,
                 [ChannelDescription]: x.description,
                 [ChannelEmail]: x.email
+            };
+        }));
+    });
+}
+
+function onexecuteGetChannelMessages(parameters: SingleRecord, properties: SingleRecord) {
+    GetChannelMessages(parameters, properties, function (a) {
+        postResult(a.map(x => {
+            return {
+                [ChannelMessageId]: x.id,
+                [ChannelMessageBody]: x.message,
+                [ChannelMessageUser]: x.user,
+                [ChannelMessageDate]: x.date
             };
         }));
     });
@@ -2285,6 +2316,52 @@ function GetChannelList(parameters: SingleRecord, properties: SingleRecord, cb) 
         if (typeof cb === 'function')
             cb(responseText);
     });
+}
+
+function GetChannelMessages(parameters: SingleRecord, properties: SingleRecord, cb) {
+    let channelTeamId = properties[ChannelTeamId];
+
+    if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
+
+    let channelId = properties[ChannelId];
+    if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
+
+    var url = baseUriEndpoint + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId) + "/messages";
+
+    ExecuteRequest(url, null, "GET", function (responseText) {
+        if (typeof cb === 'function') {
+            var messages = JSON.parse(responseText).value.map(x => { return { "id": x.id, "message": GetCleanedMessage(x), "user": x.from.user.displayName, "date": x.createdDateTime } })
+            cb(messages);
+        }
+    });
+}
+
+function GetCleanedMessage(messageObject) {
+    var message = messageObject.body.content;
+
+    if (message == '<attachment id="74d20c7f34aa4a7fb74e2b30004247c5"></attachment>') {
+        var card = messageObject.attachments[0].content;
+        var cardObject = JSON.parse(card);
+
+        cardObject.body.forEach(b => {
+            if (b.type == "ColumnSet") {
+                b.columns.forEach(c => {
+                    c.items.forEach(i => {
+                        if (i.type == "TextBlock") {
+                            var startTag = i.size != undefined && i.size == "large" ? "<h3>" : "<span>";
+                            var boldStartTag = i.weight != undefined && i.weight == "bolder" ? "<b>" : "";
+                            var boldEndTag = boldStartTag == "<b>" ? "</b>" : "";
+                            var endTag = startTag == "<h3>" ? "</h3>" : "</span>";
+
+                            message += `<div class='teams-message-row'>${startTag}${boldStartTag}${i.text}${boldEndTag}${endTag}</div>`;
+                        }
+                    });
+                });
+            }
+        });
+    }
+
+    return message;
 }
 
 function UpdateChannel(parameters: SingleRecord, properties: SingleRecord, cb) {
@@ -2789,7 +2866,7 @@ function onexecuteInstalledAppList(parameters: SingleRecord, properties: SingleR
 
 function onexecutePolicySet(parameters: SingleRecord, properties: SingleRecord) {
     SetTokenPolicy(parameters, properties, function (a) {
-        postResult({[TokenUpdateSuccess]: a.TokenUpdateSuccess});
+        postResult({ [TokenUpdateSuccess]: a.TokenUpdateSuccess });
     });
 }
 
@@ -2812,7 +2889,7 @@ function SetTokenPolicy(parameters: SingleRecord, properties: SingleRecord, cb) 
     var url = baseUriEndpointBeta + "/policies/tokenLifetimePolicies";
     ExecuteRequest(url, data, "POST", function (responseText) {
         if (typeof cb === 'function')
-            cb({TokenUpdateSuccess: true});
+            cb({ TokenUpdateSuccess: true });
     });
 }
 
