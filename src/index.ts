@@ -99,6 +99,7 @@ const ChannelMessageUser = "messageUser";
 const ChannelMessageDate = "messageDate";
 const ChannelDriveId = "channelDriveId";
 const ChannelDriveUrl = "channelDriveUrl";
+const ChannelUserMembershipId = "membershipId";
 
 const ChannelGet = "get";
 const ChannelList = "list";
@@ -112,6 +113,7 @@ const ChannelAddMember = "addMember";
 const ChannelMessages = "getMessages";
 const ChannelGetDrive = "getDrive";
 const ChannelMembers = "getChannelMembers";
+const ChannelRemoveMember = "removeMember";
 
 
 //
@@ -668,6 +670,11 @@ ondescribe = function () {
                         displayName: "User ID",
                         description: "User ID",
                         type: "string"
+                    },
+                    [ChannelUserMembershipId]: {
+                        displayName: "Membership ID",
+                        description: "Membership ID",
+                        type: "string"
                     }
                 },
                 methods: {
@@ -835,12 +842,26 @@ ondescribe = function () {
                         displayName: "Get Channel Members",
                         description: "Get Channel Members",
                         type: "list",
-                        inputs: [ChannelTeamId, 
+                        inputs: [ChannelTeamId,
                             ChannelId
                         ],
                         requiredInputs: [ChannelId,
                             ChannelTeamId],
-                        outputs: [ChannelUserId, ChannelUserName, ChannelUserPrincipalName]
+                        outputs: [ChannelUserId, ChannelUserName, ChannelUserPrincipalName, ChannelUserMembershipId]
+                    },
+                    [ChannelRemoveMember]: {
+                        displayName: "Remove Member",
+                        description: "Removes a member from a Channel",
+                        type: "delete",
+                        inputs: [ChannelTeamId,
+                            ChannelId,
+                            ChannelUserId
+                        ],
+                        requiredInputs: [ChannelTeamId,
+                            ChannelId,
+                            ChannelUserId
+                        ],
+                        outputs: [ChannelIsSuccessful]
                     }
                 }
             },
@@ -1966,6 +1987,23 @@ function AddChannelMembers(parameters: SingleRecord, properties: SingleRecord, c
     });
 }
 
+function RemoveChannelMember(parameters: SingleRecord, properties: SingleRecord, cb) {
+    let teamId = properties[ChannelTeamId];
+    if (!(typeof teamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
+
+    let channelId = properties[ChannelId];
+    if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
+
+    let channelUserId = properties[ChannelUserId];
+    if (!(typeof channelUserId === "string")) throw new Error("properties[ChannelUserId] is not of type string");
+
+    var url = baseUriEndpointBeta + "/teams/" + encodeURIComponent(teamId) + "/channels/" + encodeURIComponent(channelId) + "/members/" + encodeURIComponent(channelUserId);
+    ExecuteRequest(url, null, "DELETE", function (responseText) {
+        if (typeof cb === 'function')
+            cb(responseText);
+    });
+}
+
 // DELETE /groups/{id}/members/{id}/$ref
 function RemoveGroupMembers(parameters: SingleRecord, properties: SingleRecord, cb) {
     // var data = JSON.stringify({
@@ -2280,8 +2318,11 @@ function onexecuteChannel(methodName: string, parameters: SingleRecord, properti
         case ChannelGetDrive:
             onexecuteGetChannelDrive(parameters, properties);
             break;
-            case ChannelMembers:
+        case ChannelMembers:
             onexecuteGetChannelMembers(parameters, properties);
+            break;
+        case ChannelRemoveMember:
+            onexecuteRemoveChannelMember(parameters, properties);
             break;
         default: throw new Error("The channel method " + methodName + " is not supported...");
     }
@@ -2313,6 +2354,15 @@ function onexecuteChannelAddMember(parameters: SingleRecord, properties: SingleR
                     [ChannelIsSuccessful]: true
                 });
             }
+        });
+    });
+}
+
+function onexecuteRemoveChannelMember(parameters: SingleRecord, properties: SingleRecord) {
+    RemoveChannelMember(parameters, properties, function (c) {
+        //ToDO - remove the if condition and handle in try catch block
+        postResult({
+            [ChannelIsSuccessful]: true
         });
     });
 }
@@ -2391,7 +2441,8 @@ function onexecuteGetChannelMembers(parameters: SingleRecord, properties: Single
             return {
                 [ChannelUserId]: x.userId,
                 [ChannelUserName]: x.displayName,
-                [ChannelUserPrincipalName]: x.email
+                [ChannelUserPrincipalName]: x.email,
+                [ChannelUserMembershipId]: x.id
             };
         }));
     });
