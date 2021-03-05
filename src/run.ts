@@ -90,9 +90,9 @@ class XHR {
 mock('XMLHttpRequest', XHR);
 
 onexecute({
-    objectName: 'drive',
-    methodName: 'driveGetRootChildren',
-    properties: {"driveId":"b!liodivvnrU-bPFrG3o3bbi7jqbPXfwNMpXRs9nQguBPg5GIl5jhySrx21t1R0Dbs"},
+    objectName: 'channel',
+    methodName: 'getChannelMembers',
+    properties: {"teamId":"26be3fc7-57f3-4978-aab4-9ed41c84e271", "id":"19:dd6c53ec3c0549e1b4f095ec6b7afbdc@thread.tacv2"},
     parameters: {},
     configuration: {},
     schema: {}

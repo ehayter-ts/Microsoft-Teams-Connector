@@ -94,6 +94,7 @@ const ChannelMessageIsImportant = "messageIsImportant";
 const MembershipType = "membershipType";
 const ChannelUserPrincipalName = "userPrincipalName";
 const ChannelUserId = "userId";
+const ChannelUserName = "Name";
 const ChannelMessageUser = "messageUser";
 const ChannelMessageDate = "messageDate";
 const ChannelDriveId = "channelDriveId";
@@ -110,6 +111,7 @@ const ChannelReplyMessage = "replyMessage";
 const ChannelAddMember = "addMember";
 const ChannelMessages = "getMessages";
 const ChannelGetDrive = "getDrive";
+const ChannelMembers = "getChannelMembers";
 
 
 //
@@ -656,6 +658,16 @@ ondescribe = function () {
                         displayName: "Drive URL",
                         description: "Drive URL",
                         type: "string"
+                    },
+                    [ChannelUserName]: {
+                        displayName: "Name",
+                        description: "Name",
+                        type: "string"
+                    },
+                    [ChannelUserId]: {
+                        displayName: "User ID",
+                        description: "User ID",
+                        type: "string"
                     }
                 },
                 methods: {
@@ -818,6 +830,17 @@ ondescribe = function () {
                             ChannelId
                         ],
                         outputs: [ChannelDriveId, ChannelDriveUrl]
+                    },
+                    [ChannelMembers]: {
+                        displayName: "Get Channel Members",
+                        description: "Get Channel Members",
+                        type: "list",
+                        inputs: [ChannelTeamId, 
+                            ChannelId
+                        ],
+                        requiredInputs: [ChannelId,
+                            ChannelTeamId],
+                        outputs: [ChannelUserId, ChannelUserName, ChannelUserPrincipalName]
                     }
                 }
             },
@@ -2257,6 +2280,9 @@ function onexecuteChannel(methodName: string, parameters: SingleRecord, properti
         case ChannelGetDrive:
             onexecuteGetChannelDrive(parameters, properties);
             break;
+            case ChannelMembers:
+            onexecuteGetChannelMembers(parameters, properties);
+            break;
         default: throw new Error("The channel method " + methodName + " is not supported...");
     }
 }
@@ -2354,6 +2380,18 @@ function onexecuteChannelList(parameters: SingleRecord, properties: SingleRecord
                 [ChannelDisplayName]: x.displayName,
                 [ChannelDescription]: x.description,
                 [ChannelEmail]: x.email
+            };
+        }));
+    });
+}
+
+function onexecuteGetChannelMembers(parameters: SingleRecord, properties: SingleRecord) {
+    GetChannelMembers(parameters, properties, function (a) {
+        postResult(a.value.map(x => {
+            return {
+                [ChannelUserId]: x.userId,
+                [ChannelUserName]: x.displayName,
+                [ChannelUserPrincipalName]: x.email
             };
         }));
     });
@@ -2492,6 +2530,20 @@ function GetChannelList(parameters: SingleRecord, properties: SingleRecord, cb) 
     if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
 
     var url = baseUriEndpoint + "/teams/" + encodeURIComponent(channelTeamId) + "/channels?$select=id, displayname, description, email";
+    ExecuteRequest(url, null, "GET", function (responseText) {
+        if (typeof cb === 'function')
+            cb(responseText);
+    });
+}
+
+function GetChannelMembers(parameters: SingleRecord, properties: SingleRecord, cb) {
+    let channelTeamId = properties[ChannelTeamId];
+    if (!(typeof channelTeamId === "string")) throw new Error("properties[ChannelTeamId] is not of type string");
+
+    let channelId = properties[ChannelId];
+    if (!(typeof channelId === "string")) throw new Error("properties[ChannelId] is not of type string");
+
+    var url = baseUriEndpointBeta + "/teams/" + encodeURIComponent(channelTeamId) + "/channels/" + encodeURIComponent(channelId) + "/members";
     ExecuteRequest(url, null, "GET", function (responseText) {
         if (typeof cb === 'function')
             cb(responseText);
