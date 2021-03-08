@@ -19,6 +19,7 @@ const Tab = "tab";
 const App = "app";
 const Token = "token";
 const Drive = "drive";
+const Site = "site";
 
 //
 // Team
@@ -188,6 +189,14 @@ const DriveChildFileType = "driveChildFileType";
 
 const DriveGetRootChildren = "driveGetRootChildren";
 
+//
+//Site
+const SiteRelativePath = "siteRelativePath";
+const SiteListId = "listId";
+const SiteListName = "listName";
+const SiteListDisplayName = "listDisplayName";
+
+const SiteGetLists = "getSiteLists";
 
 //OnDescribe
 ondescribe = function () {
@@ -1522,6 +1531,41 @@ ondescribe = function () {
                         outputs: [DriveChildId, DriveChildFolderName, DriveChildWebUrl]
                     }
                 }
+            },
+            [Site]: {
+                displayName: "Site",
+                description: "Site",
+                properties: {
+                    [SiteListId]: {
+                        displayName: "List ID",
+                        description: "List ID",
+                        type: "string"
+                    },
+                    [SiteRelativePath]: {
+                        displayName: "Relative Path",
+                        description: "Relative Path",
+                        type: "string"
+                    },
+                    [SiteListName]: {
+                        displayName: "List Name",
+                        description: "List Name",
+                        type: "string"
+                    },
+                    [SiteListDisplayName]: {
+                        displayName: "List Display Name",
+                        description: "List Display Name",
+                        type: "string"
+                    }
+                },
+                methods: {
+                    [SiteGetLists]: {
+                        displayName: "Get Site Lists",
+                        type: "list",
+                        inputs: [SiteRelativePath],
+                        requiredInputs: [SiteRelativePath],
+                        outputs: [SiteListId, SiteListName, SiteListDisplayName]
+                    }
+                }
             }
         }
 
@@ -1549,6 +1593,9 @@ onexecute = function ({ objectName, methodName, parameters, properties }) {
         case Drive:
             onexecuteDrive(methodName, parameters, properties);
             break;
+        case Site:
+            onexecuteSite(methodName, parameters, properties);
+            break;
         default: throw new Error("The object " + objectName + " is not supported.");
     }
 }
@@ -1575,6 +1622,15 @@ function onexecuteDrive(methodName: string, parameters: SingleRecord, properties
     switch (methodName) {
         case DriveGetRootChildren:
             onexecuteGetDriveRootChildren(parameters, properties);
+            break;
+        default: throw new Error("The method " + methodName + " is not supported..");
+    }
+}
+
+function onexecuteSite(methodName: string, parameters: SingleRecord, properties: SingleRecord) {
+    switch (methodName) {
+        case SiteGetLists:
+            onexecuteGetSiteLists(parameters, properties);
             break;
         default: throw new Error("The method " + methodName + " is not supported..");
     }
@@ -2163,6 +2219,19 @@ function onexecuteGetDriveRootChildren(parameters: SingleRecord, properties: Sin
     });
 }
 
+function onexecuteGetSiteLists(parameters: SingleRecord, properties: SingleRecord) {
+    GetSiteLists(parameters, properties, function (a) {
+        //console.log(a);
+        postResult(a.value.map(x => {
+            return {
+                [SiteListId]: x.id,
+                [SiteListName]: x.name,
+                [SiteListDisplayName]: x.displayName
+            };
+        }));
+    });
+}
+
 function onexecuteTeamList(parameters: SingleRecord, properties: SingleRecord) {
     GetTeams(parameters, properties, function (a) {
         postResult(a.value.map(x => {
@@ -2241,6 +2310,17 @@ function GetDriveRootChildren(parameters: SingleRecord, properties: SingleRecord
     if (!(typeof driveId === "string")) throw new Error("properties[DriveId] is not of type string");
 
     var url = baseUriEndpoint + "/sites/root/drives/" + encodeURIComponent(driveId) + "/root/children";
+    ExecuteRequest(url, null, "GET", function (responseText) {
+        if (typeof cb === 'function')
+            cb(responseText);
+    });
+}
+
+function GetSiteLists(parameters: SingleRecord, properties: SingleRecord, cb) {
+    let relativePath = properties[SiteRelativePath];
+    if (!(typeof relativePath === "string")) throw new Error("properties[SiteRelativePath] is not of type string");
+
+    var url = baseUriEndpoint + "/sites/root:/" + encodeURIComponent(relativePath) + ":/lists";
     ExecuteRequest(url, null, "GET", function (responseText) {
         if (typeof cb === 'function')
             cb(responseText);
