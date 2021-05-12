@@ -90,9 +90,9 @@ class XHR {
 mock('XMLHttpRequest', XHR);
 
 onexecute({
-    objectName: 'site',
-    methodName: 'getSiteLists',
-    properties: {"siteRelativePath":"/sites/ClaimsWorkbench-ClaimCH00104"},
+    objectName: 'channel',
+    methodName: 'getMessages',
+    properties: {"teamId":"26be3fc7-57f3-4978-aab4-9ed41c84e271", "id":"19:ee6a2aa128574128896abdb0c152b24f@thread.tacv2"},
     parameters: {},
     configuration: {},
     schema: {}
