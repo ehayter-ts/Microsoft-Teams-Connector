@@ -18,7 +18,7 @@
     "k2-broker"
   ],
   "scripts": {
-    "build:debug": "npm run build:bundle-dev && node ./dist/run.js",
+    "build:debug-code": "npm run build:bundle-prod && node ./dist/run.js",
     "build": "npm run build:bundle-prod",
     "build:dev": "npm run build:bundle-dev",
     "build:bundle-dev": "node node_modules/rollup/dist/bin/rollup -c --environment NODE_ENV:development",
