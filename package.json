@@ -62,7 +62,7 @@
     "nyc": "^15.0.0",
     "rollup": "^2.7.6",
     "rollup-plugin-babel": "4.3.3",
-    "rollup-plugin-terser": "5.2.0"
+    "rollup-plugin-terser": "^7.0.2"
   },
   "dependencies": {
     "request": "^2.88.2"
